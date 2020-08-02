@@ -3,6 +3,7 @@ import java.util.Scanner;
 
 public class FileParser {
     public static void main(String[] args){
+        System.out.println("Input Filename");
         Scanner scan = new Scanner(System.in);
         String fileName = scan.next();
         File results = new File(fileName);
