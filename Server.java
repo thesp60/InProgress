@@ -83,7 +83,7 @@ public class Server {
 
                 public void run() {
                     // read and service request on socket
-                    System.out.println();
+                    System.out.println(Thread.currentThread().getId());
                 }
             }
         }
@@ -92,7 +92,7 @@ public class Server {
 
         final NetworkService site = new NetworkService(6000, 20);
         site.run();
-        site.
+        
 
 
         //connect incoming connection to Queue
