@@ -66,7 +66,7 @@ public class Server {
 
             public void run() { // run the service
                 try {
-                    for (;;) {
+                    while(true) {
                         pool.execute(new Handler(serverSocket.accept()));
                     }
                 } catch (final IOException ex) {
@@ -83,6 +83,7 @@ public class Server {
 
                 public void run() {
                     // read and service request on socket
+                    System.out.println();
                 }
             }
         }
@@ -90,7 +91,10 @@ public class Server {
          
 
         final NetworkService site = new NetworkService(6000, 20);
-          site.run();
+        site.run();
+        site.
+
+
         //connect incoming connection to Queue
 
         
