@@ -1,17 +1,15 @@
-package biz.burse;  
+//package biz.burse;  
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.*;
-import java.io.*;
 import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.Scanner;
-import javax.net.*;
-import java.net.ServerSocket;
-import javax.net.ssl.SSLServerSocketFactory;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -19,6 +17,8 @@ import java.util.concurrent.Executors;
 //import org.apache.activemq.broker.*;
 
 public class Server {
+    //private 
+
     public static void main(final String[] args) throws Exception {
         /*
         // Initiate source connection - shelter
@@ -46,6 +46,10 @@ public class Server {
         */
          try (Socket connection =new Socket("localhost", 40) ){
         //try (Socket connection = new Socket(shelterAddress, port)) {
+            
+            //Await incoming connections
+            final NetworkService site = new NetworkService(6000, 20, connection); //port 6000 with 20 threads
+            site.run();
 
         } catch (final IOException e) {
                 System.out.println("Port down");
@@ -54,9 +58,8 @@ public class Server {
         // Copy data from shelter to internal Queue
         final Deque<byte[]> queue = new ArrayDeque<>();
 
-        //Await incoming connections
-        final NetworkService site = new NetworkService(6000, 20); //port 6000 with 20 threads
-        site.run();
+        
+        
 
         //connect incoming connection to Queue
 
@@ -66,10 +69,12 @@ public class Server {
     private static class NetworkService implements Runnable {
             private final ServerSocket serverSocket;
             private final ExecutorService pool;
+            private final Socket connection;
          
-            public NetworkService(final int port, final int poolSize) throws IOException {
+            public NetworkService(final int port, final int poolSize, Socket connection) throws IOException {
                 serverSocket = new ServerSocket(port);
                 pool = Executors.newFixedThreadPool(poolSize);
+                this.connection = connection;
             }
 
             public void run() { // run the service
@@ -91,6 +96,21 @@ public class Server {
 
                 public void run() {
                     // read and service request on socket
+                    try( BufferedReader in =  new BufferedReader( new InputStreamReader(connection.getInputStream())) ;
+                        PrintWriter out =  new PrintWriter(socket.getOutputStream(), true)) {
+                        
+                        while(true){
+                          String temp = in.readLine();
+                          out.println(temp);
+                          out.write(temp);
+                          System.out.println(temp);
+                        }
+                            
+                        
+                    }catch (Exception e){
+
+                    }
+                    
                     System.out.println(Thread.currentThread().getId());
                 }
             }
