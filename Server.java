@@ -1,4 +1,4 @@
-package biz.burse;
+package biz.burse;  
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -6,6 +6,8 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.*;
 import java.io.*;
+import java.util.ArrayDeque;
+import java.util.Queue;
 import java.util.Scanner;
 import javax.net.*;
 import java.net.ServerSocket;
@@ -18,15 +20,14 @@ public class Server {
     public static void main(final String[] args) throws Exception {
 
         // Initiate source connection - shelter
-        //int port = 0;
         InetAddress shelterAddress=null;
         int port =0; 
         try (BufferedReader reader = new BufferedReader(new FileReader("sharedInfo.cfg"))) {
             final String[] hostPort = reader.readLine().split(" ");
-            byte[] IP = new byte[4];
+            final byte[] IP = new byte[4];
             final String[] input = hostPort[0].split(".");
-            for(int i=0;i<IP.length;i++){
-                IP[i]=Byte.valueOf(input[i]);
+            for (int i = 0; i < IP.length; i++) {
+                IP[i] = Byte.valueOf(input[i]);
             }
             shelterAddress = InetAddress.getByAddress(IP);
             port = Integer.valueOf(hostPort[1]);
@@ -37,18 +38,19 @@ public class Server {
             System.out.println("system issue" + e);
         }
 
-        if(port==0 || shelterAddress==null){
+        if (port == 0 || shelterAddress == null) {
             throw new IllegalArgumentException();
         }
 
-        try (Socket connection = new Socket(shelterAddress, port) ){
+        // try (Socket connection =new Socket("localhost", port) ){
+        try (Socket connection = new Socket(shelterAddress, port)) {
 
         } catch (final IOException e) {
 
         }
 
-
-        //Copy data from shelter to internal Queue
+        // Copy data from shelter to internal Queue
+        final Deque<byte[]> queue = new ArrayDeque<>();
 
         //Await incoming connections
 
