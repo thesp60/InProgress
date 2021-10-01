@@ -7,7 +7,7 @@ public class FileParser {
         Scanner scan = new Scanner(System.in);
         String fileName = scan.next();
         File results = new File(fileName);
-        int total = 0;
+        int total = 5;
         try( Scanner scan2 = new Scanner(results)){
             while(scan2.hasNext()){
                 total+=scan2.nextInt();
