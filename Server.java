@@ -12,19 +12,19 @@ import java.net.ServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 
 
-import org.apache.activemq.broker.*;
+//import org.apache.activemq.broker.*;
 
 public class Server {
     public static void main(final String[] args) throws Exception {
 
         // Initiate source connection - shelter
         //int port = 0;
-        final InetAddress shelterAddress; 
+        final InetAddress shelterAddress;
+        int port =0; 
         try (BufferedReader reader = new BufferedReader(new FileReader("sharedInfo.cfg"))) {
-            final String[] hostPort = reader.readLine().split(" ")[0];
-            final String host = hostPort[0].trim();
+            final String[] hostPort = reader.readLine().split(" ");
+            shelterAddress = new InetSocketAddress(hostPort[0].trim());
             port = Integer.valueOf(hostPort[1]);
-            shelterAddress = new InetSocketAddress(host, port);
 
         } catch (final FileNotFoundException e) {
             System.out.println("no file" + e);
@@ -32,7 +32,11 @@ public class Server {
             System.out.println("system issue" + e);
         }
 
-        try (Socket connection = new Socket(shelterAddress) ){
+        if(port==0){
+            throw new IllegalArgumentException();
+        }
+
+        try (Socket connection = new Socket(shelterAddress, port) ){
 
         } catch (final IOException e) {
 
