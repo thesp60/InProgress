@@ -7,11 +7,13 @@ import java.net.Socket;
 import java.nio.*;
 import java.io.*;
 import java.util.ArrayDeque;
-import java.util.Queue;
+import java.util.Deque;
 import java.util.Scanner;
 import javax.net.*;
 import java.net.ServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 
 //import org.apache.activemq.broker.*;
@@ -53,7 +55,42 @@ public class Server {
         final Deque<byte[]> queue = new ArrayDeque<>();
 
         //Await incoming connections
+         class NetworkService implements Runnable {
+            private final ServerSocket serverSocket;
+            private final ExecutorService pool;
+         
+            public NetworkService(final int port, final int poolSize) throws IOException {
+                serverSocket = new ServerSocket(port);
+                pool = Executors.newFixedThreadPool(poolSize);
+            }
 
+            public void run() { // run the service
+                try {
+                    for (;;) {
+                        pool.execute(new Handler(serverSocket.accept()));
+                    }
+                } catch (final IOException ex) {
+                    pool.shutdown();
+                }
+            }
+
+            class Handler implements Runnable {
+                private final Socket socket;
+
+                Handler(final Socket socket) {
+                    this.socket = socket;
+                }
+
+                public void run() {
+                    // read and service request on socket
+                }
+            }
+        }
+
+         
+
+        final NetworkService site = new NetworkService(6000, 20);
+          site.run();
         //connect incoming connection to Queue
 
         
