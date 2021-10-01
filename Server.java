@@ -20,7 +20,7 @@ import java.util.concurrent.Executors;
 
 public class Server {
     public static void main(final String[] args) throws Exception {
-
+        /*
         // Initiate source connection - shelter
         InetAddress shelterAddress=null;
         int port =0; 
@@ -43,19 +43,27 @@ public class Server {
         if (port == 0 || shelterAddress == null) {
             throw new IllegalArgumentException();
         }
-
-        // try (Socket connection =new Socket("localhost", port) ){
-        try (Socket connection = new Socket(shelterAddress, port)) {
+        */
+         try (Socket connection =new Socket("localhost", 40) ){
+        //try (Socket connection = new Socket(shelterAddress, port)) {
 
         } catch (final IOException e) {
-
+                System.out.println("Port down");
         }
 
         // Copy data from shelter to internal Queue
         final Deque<byte[]> queue = new ArrayDeque<>();
 
         //Await incoming connections
-         class NetworkService implements Runnable {
+        final NetworkService site = new NetworkService(6000, 20); //port 6000 with 20 threads
+        site.run();
+
+        //connect incoming connection to Queue
+
+        
+    }
+
+    private static class NetworkService implements Runnable {
             private final ServerSocket serverSocket;
             private final ExecutorService pool;
          
@@ -87,16 +95,4 @@ public class Server {
                 }
             }
         }
-
-         
-
-        final NetworkService site = new NetworkService(6000, 20);
-        site.run();
-        
-
-
-        //connect incoming connection to Queue
-
-        
-    }
 }
