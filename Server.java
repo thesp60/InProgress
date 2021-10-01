@@ -23,7 +23,12 @@ public class Server {
         int port =0; 
         try (BufferedReader reader = new BufferedReader(new FileReader("sharedInfo.cfg"))) {
             final String[] hostPort = reader.readLine().split(" ");
-            shelterAddress = new InetSocketAddress(hostPort[0].trim());
+            byte[] IP = new byte[4];
+            final String[] input = hostPort[0].split(".");
+            for(int i=0;i<IP.length;i++){
+                IP[i]=Integer.valueOf(input[i]);
+            }
+            shelterAddress = new InetSocketAddress(input);
             port = Integer.valueOf(hostPort[1]);
 
         } catch (final FileNotFoundException e) {
