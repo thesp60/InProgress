@@ -19,16 +19,16 @@ public class Server {
 
         // Initiate source connection - shelter
         //int port = 0;
-        final InetAddress shelterAddress;
+        InetAddress shelterAddress=null;
         int port =0; 
         try (BufferedReader reader = new BufferedReader(new FileReader("sharedInfo.cfg"))) {
             final String[] hostPort = reader.readLine().split(" ");
             byte[] IP = new byte[4];
             final String[] input = hostPort[0].split(".");
             for(int i=0;i<IP.length;i++){
-                IP[i]=Integer.valueOf(input[i]);
+                IP[i]=Byte.valueOf(input[i]);
             }
-            shelterAddress = new InetSocketAddress(input);
+            shelterAddress = InetAddress.getByAddress(IP);
             port = Integer.valueOf(hostPort[1]);
 
         } catch (final FileNotFoundException e) {
@@ -37,7 +37,7 @@ public class Server {
             System.out.println("system issue" + e);
         }
 
-        if(port==0){
+        if(port==0 || shelterAddress==null){
             throw new IllegalArgumentException();
         }
 
