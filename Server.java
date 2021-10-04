@@ -10,14 +10,13 @@ import java.io.*;
 import java.nio.file.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.InetAddress;
 import java.util.ArrayDeque;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 //import org.apache.activemq.broker.*;
 
-
-//import org.apache.activemq.broker.*;
 
 public class Server {
     private static final String CONFIG_FILE = "SharedInfo.cfg";
@@ -35,26 +34,43 @@ public class Server {
         } catch (final FileNotFoundException e) {
             System.out.println("no file" + e);
         }
-        /*
-         // Initiate source connection - shelter try (BufferedReader reader = new
-         BufferedReader(new FileReader("sharedInfo.cfg"))) {
-         while(reader.readLine()!=null){ final String[] hostPort =
-         reader.readLine().split(" "); final byte[] IP = new byte[4]; final String[]
-         input = hostPort[0].split("."); for (int i = 0; i < IP.length; i++) { IP[i] =
-         Byte.valueOf(input[i]); }
+        
+         // Initiate source connection - shelter 
+         try (BufferedReader reader = new BufferedReader(new FileReader(CONFIG_FILE))) {
+            while(reader.readLine()!=null){
+                if(reader.readLine()==null){
+                    break;
+                }
+                final String[] hostPort = reader.readLine().split(" ");
+                //final byte[] IP = new byte[4];
+
+                final String IP = hostPort[0];        
          
-         final InetAddress shelterAddress = InetAddress.getByAddress(IP); final int
-         port = Integer.valueOf(hostPort[1]);
+                //final InetAddress shelterAddress = InetAddress.getByAddress(IP);
+                System.out.println("ip format") ;
+                final int port = Integer.valueOf(hostPort[1]);
+
+                try{ 
+                    Socket connection =new Socket(IP, port);
+                    connections.put(port, connection);
+                    System.out.println("out");
+                    
+                } catch (final IOException e){ 
+                    System.out.println("Connection Not Estiblished, Bad Destination IP or Destination Port"); 
+                }
+            }
+        } catch (IOException e){
+            System.out.println(e);
+        }
          
-         try{ Socket connection =new Socket("shelterAddress", port)
-             connections.put(port, connection);
-         
-         } catch (final IOException e){ 
-            System.out.println("Connection Not Estiblished, Bad Destination IP or Destination Port"); 
-         }
-         
-         */
-        try (Socket connection = new Socket("localhost", 40)) {
+         System.out.println("Successfull Setup");
+
+        try{
+            for(Map.Entry<Integer, Socket> connection : connections.entrySet()){
+                final NetworkService site = new NetworkService(connection.getKey(), 20, connection.getValue()); // port 6000 with 20 threads
+                site.run();
+            }
+
             // try (Socket connection = new Socket(shelterAddress, port)) {
 
             // Copy data from shelter to internal Queue
@@ -64,8 +80,8 @@ public class Server {
             // BrokerService broker = BrokerFactory.createBroker("Test");
 
             // Await incoming connections
-            final NetworkService site = new NetworkService(6000, 20, connection); // port 6000 with 20 threads
-            site.run();
+            //final NetworkService site = new NetworkService(6000, 20, connection); // port 6000 with 20 threads
+            //site.run();
 
         } catch (final IOException e) {
             System.out.println("Port down");
@@ -87,6 +103,7 @@ public class Server {
         public void run() { // run the service
             try {
                 while (true) {
+                    System.out.println("Opening Connection "+ serverSocket.getLocalPort());
                     pool.execute(new Handler(serverSocket.accept()));
                 }
             } catch (final IOException ex) {
