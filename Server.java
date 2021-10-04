@@ -29,6 +29,9 @@ public class Server {
         try {
             if (Files.notExists(FileSystems.getDefault().getPath(CONFIG_FILE).toAbsolutePath())) {
                 Files.createFile(FileSystems.getDefault().getPath(CONFIG_FILE).toAbsolutePath());
+                try(BufferedWriter writer =new BufferedWriter(new FileWriter(CONFIG_FILE))){
+                    writer.append("Input Configuration in Shelter IP Shelter Port and External Port \nExample X.X.X.X 40 30000");
+                }
                 System.out.println("Created Example Configuration File");
             }
         } catch (final FileNotFoundException e) {
@@ -37,30 +40,30 @@ public class Server {
         
          // Initiate source connection - shelter 
          try (BufferedReader reader = new BufferedReader(new FileReader(CONFIG_FILE))) {
-             String line = reader.readLine();
+             String line = "Start";
             while(line!=null){
                 System.out.println(line);
+                line = reader.readLine();
                 if(line==null){
                     break;
                 }
+                if(!Character.isDigit(line.charAt(0))){ 
+                    continue;
+                }
                 final String[] hostPort = line.split(" ");
-                //final byte[] IP = new byte[4];
 
-                final String IP = hostPort[0];        
-         
-                //final InetAddress shelterAddress = InetAddress.getByAddress(IP);
+                final String IP = hostPort[0]; 
                 
                 final int port = Integer.valueOf(hostPort[1]);
 
                 try{ 
                     Socket connection =new Socket(IP, port);
-                    connections.put(port, connection);
+                    connections.put(Integer.valueOf(hostPort[2]), connection);
                     System.out.println("out");
                     
                 } catch (final IOException e){ 
                     System.out.println("Connection Not Estiblished, Bad Destination IP or Destination Port"); 
                 }
-                line = reader.readLine();
             }
         } catch (IOException e){
             System.out.println(e);
