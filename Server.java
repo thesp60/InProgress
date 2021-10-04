@@ -33,6 +33,7 @@ public class Server {
                     writer.append("Input Configuration in Shelter IP Shelter Port and External Port \nExample X.X.X.X 40 30000");
                 }
                 System.out.println("Created Example Configuration File");
+                System.exit(0);
             }
         } catch (final FileNotFoundException e) {
             System.out.println("no file" + e);
@@ -47,6 +48,7 @@ public class Server {
                 if(line==null){
                     break;
                 }
+
                 if(!Character.isDigit(line.charAt(0))){ 
                     continue;
                 }
@@ -62,36 +64,30 @@ public class Server {
                     System.out.println("out");
                     
                 } catch (final IOException e){ 
-                    System.out.println("Connection Not Estiblished, Bad Destination IP or Destination Port"); 
+                    System.out.println("Connection Not Established, Bad Destination IP or Destination Port"); 
                 }
             }
         } catch (IOException e){
             System.out.println(e);
         }
          
+        if(connections.size()==0){
+            System.out.println("0 Shelter Connections Established");
+            System.exit(0);
+        }
          System.out.println("Successfull Setup");
 
         try{
+            //create thread pool for running each new server port
             final ExecutorService pool;
             pool = Executors.newFixedThreadPool(connections.size());
+            
+            //create new port for each connection estiblished
             for(Map.Entry<Integer, Socket> connection : connections.entrySet()){
                 System.out.println("thread start "+  connections.size());
-                pool.execute(new NetworkService(connection.getKey()+1, 20, connection.getValue())); // 20 threads
-                //pool.execute(site.run());
-                //System.out.println("Port down");
+                pool.execute(new NetworkService(connection.getKey()+1, 20, connection.getValue())); // 20 threads (20 incoming connections to server)
             }
 
-            // try (Socket connection = new Socket(shelterAddress, port)) {
-
-            // Copy data from shelter to internal Queue
-            final Deque<byte[]> queue = new ArrayDeque<>();
-
-            // connect incoming connection to Topic
-            // BrokerService broker = BrokerFactory.createBroker("Test");
-
-            // Await incoming connections
-            //final NetworkService site = new NetworkService(6000, 20, connection); // port 6000 with 20 threads
-            //site.run();
 
         } catch (final IOException e) {
             System.out.println("Port down");
