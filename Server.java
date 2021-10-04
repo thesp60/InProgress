@@ -37,17 +37,19 @@ public class Server {
         
          // Initiate source connection - shelter 
          try (BufferedReader reader = new BufferedReader(new FileReader(CONFIG_FILE))) {
-            while(reader.readLine()!=null){
-                if(reader.readLine()==null){
+             String line = reader.readLine();
+            while(line!=null){
+                System.out.println(line);
+                if(line==null){
                     break;
                 }
-                final String[] hostPort = reader.readLine().split(" ");
+                final String[] hostPort = line.split(" ");
                 //final byte[] IP = new byte[4];
 
                 final String IP = hostPort[0];        
          
                 //final InetAddress shelterAddress = InetAddress.getByAddress(IP);
-                System.out.println("ip format") ;
+                
                 final int port = Integer.valueOf(hostPort[1]);
 
                 try{ 
@@ -58,6 +60,7 @@ public class Server {
                 } catch (final IOException e){ 
                     System.out.println("Connection Not Estiblished, Bad Destination IP or Destination Port"); 
                 }
+                line = reader.readLine();
             }
         } catch (IOException e){
             System.out.println(e);
@@ -66,9 +69,13 @@ public class Server {
          System.out.println("Successfull Setup");
 
         try{
+            final ExecutorService pool;
+            pool = Executors.newFixedThreadPool(connections.size());
             for(Map.Entry<Integer, Socket> connection : connections.entrySet()){
-                final NetworkService site = new NetworkService(connection.getKey(), 20, connection.getValue()); // port 6000 with 20 threads
-                site.run();
+                System.out.println("thread start "+  connections.size());
+                pool.execute(new NetworkService(connection.getKey()+1, 20, connection.getValue())); // 20 threads
+                //pool.execute(site.run());
+                //System.out.println("Port down");
             }
 
             // try (Socket connection = new Socket(shelterAddress, port)) {
@@ -103,7 +110,7 @@ public class Server {
         public void run() { // run the service
             try {
                 while (true) {
-                    System.out.println("Opening Connection "+ serverSocket.getLocalPort());
+                    //System.out.println("Opening Connection "+ serverSocket.getLocalPort());
                     pool.execute(new Handler(serverSocket.accept()));
                 }
             } catch (final IOException ex) {
